@@ -7,11 +7,20 @@
 #property link      "http://www.mql5.com"
 #property version   "1.00"
 
-#include <CAnn.mqh>
+//#include <CAnn.mqh>
+//
+//CAnn a;
 
-CAnn a;
+#include <CalculateMACD.mqh>
+
+CCalculate* c;
 
 void OnStart() 
 {
+
+c = new CCalculateMACD();
+
+c.calculate();
+
 }
 
