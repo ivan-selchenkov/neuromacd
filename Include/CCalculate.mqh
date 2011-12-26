@@ -3,5 +3,5 @@
 
 class CCalculate {
    public:
-      virtual void calculate() {};
+      virtual void calculate (int AnnInputs, double &inputVector[]) {};
 };

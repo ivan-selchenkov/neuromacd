@@ -2,6 +2,7 @@
 #property version   "1.00"
 
 #include <Fann2MQL.mqh>
+#include <CalculateMACD.mqh>
 
 class CAnn {
 
@@ -10,7 +11,7 @@ class CAnn {
       int debugLevel;
       int annInputs;
       string path;
-      
+      CCalculate* calculator;
 
    public:
 
@@ -34,6 +35,9 @@ class CAnn {
       }
    }
 
+   /**
+   * Загрузка нейросети из файла или создание новой
+   */
    bool
    ann_load ()
    {
@@ -57,6 +61,9 @@ class CAnn {
        }
    }
    
+   /**
+   * Сохранение нейросети в файл
+   */
    void
    ann_save ()
    {
@@ -65,6 +72,9 @@ class CAnn {
        debug (1, "f2M_save(" + ann + ", " + path + ") returned: " + ret);
    }
 
+   /**
+   * Уничтожение нейросети
+   */ 
    void
    ann_destroy ()
    {
@@ -73,6 +83,9 @@ class CAnn {
        debug (1, "f2M_destroy(" + ann + ") returned: " + ret);
    }
 
+   /**
+   * Запуск нейросети на входящих данных
+   */
    double
    ann_run (double &vector[])
    {
@@ -88,27 +101,28 @@ class CAnn {
       debug (3, "f2M_get_output(" + ann + ") returned: " + out);
       return (out);
    }
-
-   void setCalculate() {
-      
-   }
-
-   void
-   ann_prepare_input ()
-   la{
-   int i;
    
-   for (i = 0; i <= AnnInputs - 1; i = i + 3) {
-   InputVector[i] =
-   10 * iMACD (NULL, 0, FastMA, SlowMA, SignalMA, PRICE_CLOSE,
-   MODE_MAIN, i * 3);
-   InputVector[i + 1] =
-   10 * iMACD (NULL, 0, FastMA, SlowMA, SignalMA, PRICE_CLOSE,
-   MODE_SIGNAL, i * 3);
-   InputVector[i + 2] = InputVector[i - 2] - InputVector[i - 1];
-   }
+   /**
+   * Обучение нейросети на входных и выходных данных
+   */
+   void
+   ann_train (double &input_vector[], double &output_vector[])
+   {
+      if (f2M_train (ann, input_vector, output_vector) == -1) {
+         debug (0, "Network TRAIN ERROR! ann=" + ann);
+      }
+         debug (3, "ann_train(" + ann + ") succeded");
+      }
    }
 
 
+   void setCalculate(CCalculate* c) {
+      this.calculator = c;
+   }
+
+   void ann_prepare_input() {
+      double inputVector[];
+      calculator.calculate(annInputs, inputVector);
+   }
 
 };
