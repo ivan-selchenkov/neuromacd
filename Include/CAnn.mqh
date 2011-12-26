@@ -2,7 +2,7 @@
 #property version   "1.00"
 
 #include <Fann2MQL.mqh>
-#include <CalculateMACD.mqh>
+#include <CCalculate.mqh>
 
 class CAnn {
 
@@ -20,6 +20,34 @@ class CAnn {
       debugLevel = 2;
       annInputs = annInputNumber;
       path = sPath;
+      
+       /* Load the ANN */
+       ann = f2M_create_from_file (path);
+       if (ann != -1) {
+      	debug (1, "ANN: '" + path + "' loaded successfully with handler " + (string)ann);
+       }
+       else { /* Create ANN */
+      	ann = f2M_create_standard (4, annInputs, annInputs, annInputs / 2 + 1, 1);
+      	f2M_set_act_function_hidden (ann, FANN_SIGMOID_SYMMETRIC_STEPWISE);
+      	f2M_set_act_function_output (ann, FANN_SIGMOID_SYMMETRIC_STEPWISE);
+      	f2M_randomize_weights (ann, -0.4, 0.4);
+       }
+       if (ann == -1) {
+      	debug (0, "ERROR INITIALIZING NETWORK!");
+       } else {
+         debug (1, "ANN: '" + path + "' created successfully with handler " + (string)ann);
+       }
+   }
+   
+   /**
+   * Уничтожение нейросети
+   */ 
+   ~CAnn() {
+      int ret;
+      if(ann != -1) {      
+         ret = f2M_destroy (ann);
+         debug (1, "f2M_destroy(" + ann + ") returned: " + ret);
+      }
    }
 
    /**
@@ -36,32 +64,6 @@ class CAnn {
    }
 
    /**
-   * Загрузка нейросети из файла или создание новой
-   */
-   bool
-   ann_load ()
-   {
-       /* Load the ANN */
-       ann = f2M_create_from_file (path);
-       if (ann != -1) {
-      	debug (1, "ANN: '" + path + "' loaded successfully with handler " + (string)ann);
-       }
-       else { /* Create ANN */
-      	ann = f2M_create_standard (4, annInputs, annInputs, annInputs / 2 + 1, 1);
-      	f2M_set_act_function_hidden (ann, FANN_SIGMOID_SYMMETRIC_STEPWISE);
-      	f2M_set_act_function_output (ann, FANN_SIGMOID_SYMMETRIC_STEPWISE);
-      	f2M_randomize_weights (ann, -0.4, 0.4);
-      	debug (1, "ANN: '" + path + "' created successfully with handler " + (string)ann);
-       }
-       if (ann == -1) {
-      	debug (0, "ERROR INITIALIZING NETWORK!");
-      	return(false);
-       } else {
-         return(true);
-       }
-   }
-   
-   /**
    * Сохранение нейросети в файл
    */
    void
@@ -70,17 +72,6 @@ class CAnn {
        int ret = -1;
        ret = f2M_save (ann, path);
        debug (1, "f2M_save(" + ann + ", " + path + ") returned: " + ret);
-   }
-
-   /**
-   * Уничтожение нейросети
-   */ 
-   void
-   ann_destroy ()
-   {
-       int ret = -1;
-       ret = f2M_destroy (ann);
-       debug (1, "f2M_destroy(" + ann + ") returned: " + ret);
    }
 
    /**
@@ -110,14 +101,14 @@ class CAnn {
    {
       if (f2M_train (ann, input_vector, output_vector) == -1) {
          debug (0, "Network TRAIN ERROR! ann=" + ann);
-      }
+      } else {
          debug (3, "ann_train(" + ann + ") succeded");
       }
    }
 
 
-   void setCalculate(CCalculate* c) {
-      this.calculator = c;
+   void setCalculate(CCalculate* calc) {
+      this.calculator = calc;
    }
 
    void ann_prepare_input() {

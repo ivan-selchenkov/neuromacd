@@ -11,16 +11,23 @@
 //
 //CAnn a;
 
+#include <AnnManager.mqh>
 #include <CalculateMACD.mqh>
 
-CCalculate* c;
+CCalculate *c;
+CAnnManager *m;
 
 void OnStart() 
 {
 
-c = new CCalculateMACD();
-
-c.calculate();
+   c = new CCalculateMACD();
+   
+   m = new CAnnManager(2, 3, "C:\\ANN\\", "test", c);
+   
+   m.saveAll();
+   
+   delete m;
+   delete c;
 
 }
 
