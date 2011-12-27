@@ -11,7 +11,7 @@ private:
    CAnn* annsArray[];
    
 public:
-   CAnnManager(int annsNumber, int annInputNumber, string path, string prefix, CCalculate* calc) {
+   CAnnManager(int annsNumber, string path, string prefix, CCalculate* calc) {
       string annPath;
       CAnn *ann;  
    
@@ -24,12 +24,11 @@ public:
        
       for (int i = 0; i < annsNumber; i++) {
          if (i % 2 == 0) {
-            ann = new CAnn(annInputNumber, annPath + "." + i + "-long.net");
+            ann = new CAnn(annPath + "." + i + "-long.net", calc);
          } else {
-            ann = new CAnn(annInputNumber, annPath + "." + i + "-short.net");
+            ann = new CAnn(annPath + "." + i + "-short.net", calc);
          }
 
-         ann.setCalculate(calc);
          annsArray[i] = ann;
       }
    }
@@ -45,4 +44,23 @@ public:
          annsArray[i].ann_save();
       }
    }
+   
+   double wiseLong()
+   {
+      int i;
+      double ret;
+      
+      if (annsNumber < 1)
+         return (-1);
+      
+      for (i = 0; i < annsNumber; i += 2) {
+         ret += annsArray[i].ann_run();
+      }
+      
+      ret = 2 * ret / annsNumber;
+      
+      debug (3, "Wise long: " + ret);
+      return (ret);
+   }
+   
 };

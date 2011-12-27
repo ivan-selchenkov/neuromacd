@@ -22,7 +22,7 @@ void OnStart()
 
    c = new CCalculateMACD();
    
-   m = new CAnnManager(2, 3, "C:\\ANN\\", "test", c);
+   m = new CAnnManager(2, "C:\\ANN\\", "test", c);
    
    m.saveAll();
    

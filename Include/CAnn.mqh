@@ -12,14 +12,17 @@ class CAnn {
       int annInputs;
       string path;
       CCalculate* calculator;
+      double inputVector[];
 
    public:
 
-   CAnn(int annInputNumber, string sPath) {
+   CAnn(string sPath, CCalculate* calc) {
       ann = -1;
       debugLevel = 2;
-      annInputs = annInputNumber;
+      annInputs = calc.getInputsNumber();
       path = sPath;
+
+      this.calculator = calc;
       
        /* Load the ANN */
        ann = f2M_create_from_file (path);
@@ -37,6 +40,9 @@ class CAnn {
        } else {
          debug (1, "ANN: '" + path + "' created successfully with handler " + (string)ann);
        }
+       
+       ArrayResize(inputVector, annInputs);
+       
    }
    
    /**
@@ -78,12 +84,15 @@ class CAnn {
    * Запуск нейросети на входящих данных
    */
    double
-   ann_run (double &vector[])
+   ann_run ()
    {
       int ret;
       double out;
-
-      ret = f2M_run (ann, vector);
+      
+      calculator.calculate(inputVector);     
+      
+      ret = f2M_run (ann, inputVector);
+      
       if (ret < 0) {
          debug (0, "Network RUN ERROR! ann=" + ann);
          return (FANN_DOUBLE_ERROR);
@@ -104,16 +113,6 @@ class CAnn {
       } else {
          debug (3, "ann_train(" + ann + ") succeded");
       }
-   }
-
-
-   void setCalculate(CCalculate* calc) {
-      this.calculator = calc;
-   }
-
-   void ann_prepare_input() {
-      double inputVector[];
-      calculator.calculate(annInputs, inputVector);
    }
 
 };
